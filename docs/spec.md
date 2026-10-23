@@ -17,7 +17,11 @@ and reload it" feedback. Still: no GCP project, no OAuth, no Google setup.
    extractor, renders top 3: code, sender, age.
 4. Click row → `navigator.clipboard.writeText`, "copied", popup closes.
 
-Feed lists **unread** inbox mail only — OTPs are unread on arrival. v1.0's
+Feed lists **unread** inbox mail only — OTPs are unread on arrival. v1.5
+(issue #4) also reads `/feed/atom/unread` and `/feed/atom/<label>` per
+signed-in slot, so mail a filter labels and archives still shows; labels come
+from the options page (`storage.local`, ≤10, `feedUrls`/`parseLabels` in
+extractor.js). v1.0's
 content-script scraper (git history) is the fallback design if Google ever
 retires the feed.
 
@@ -77,8 +81,8 @@ retires the feed.
 - `host_permissions`: `https://mail.google.com/*` only.
 - `permissions`: `clipboardWrite` + `offscreen` (Chrome-internal clipboard
   relay; Firefox ignores it). `scripting` + content script dropped in v1.1.
-- No storage, no remote code, no hosts beyond mail.google.com; codes fetched
-  live per popup open, never persisted.
+- `storage` (v1.5): only the user's label list. No remote code, no hosts
+  beyond mail.google.com; codes fetched live per popup open, never persisted.
 
 ## States
 - No Gmail session cookie → "Sign in to Gmail in this browser first."

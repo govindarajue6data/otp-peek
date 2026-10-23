@@ -110,7 +110,36 @@ function parseFeed(xmlText) {
   return rows;
 }
 
-const OtpPeek = { extractCodes, rankRows, ageStr, parseFeed, LOOKBACK_MS };
+// Options-page text → label names: one per line or comma-separated, capped
+// so a long list can't fan out into dozens of requests per popup open.
+// Inbox and unread are always read, so listing them adds nothing.
+const MAX_LABELS = 10;
+const BUILT_IN_FEEDS = new Set(["inbox", "unread"]);
+
+function parseLabels(text) {
+  const labels = [];
+  const seen = new Set();
+  for (const part of String(text).split(/[\n,]/)) {
+    const name = part.trim();
+    const key = name.toLowerCase();
+    if (!name || BUILT_IN_FEEDS.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    labels.push(name);
+  }
+  return labels.slice(0, MAX_LABELS);
+}
+
+// Feeds per account slot. The plain feed lists unread Inbox mail only, so a
+// filter that labels OTP mail and skips the Inbox hides it (issue #4). Also
+// read the all-unread feed (Gmail may not serve it; it then adds nothing)
+// and one feed per label the user listed in the options page.
+function feedUrls(accountIndex, labels = []) {
+  const base = `https://mail.google.com/mail/u/${accountIndex}/feed/atom`;
+  const extra = parseLabels(labels.join("\n")).map((name) => `${base}/${encodeURIComponent(name)}`);
+  return [base, `${base}/unread`, ...extra];
+}
+
+const OtpPeek = { extractCodes, rankRows, ageStr, parseFeed, feedUrls, parseLabels, LOOKBACK_MS };
 /* node:coverage disable */
 // Environment fork: the browser side can never execute under node --test.
 if (typeof module !== "undefined" && module.exports) {

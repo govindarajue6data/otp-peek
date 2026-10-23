@@ -63,6 +63,12 @@ async function init() {
   const ranked = OtpPeek.rankRows(rows, Date.now()).slice(0, 3);
   if (ranked.length === 0) {
     showStatus("No unread OTP in the last 20 minutes.");
+    // Most common cause besides timing: a filter that skips the Inbox.
+    const hint = document.createElement("button");
+    hint.className = "link";
+    hint.textContent = "Codes under a Gmail label? Add it in settings";
+    hint.addEventListener("click", () => ext.runtime.openOptionsPage());
+    listEl.append(hint);
     return;
   }
   render(ranked);

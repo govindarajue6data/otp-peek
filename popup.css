@@ -53,3 +53,32 @@ h1 {
 .meta {
   font-size: 12px;
 }
+.options {
+  max-width: 420px;
+}
+.options label {
+  font-weight: 600;
+}
+.hint {
+  margin: 4px 0 8px;
+  opacity: 0.8;
+}
+.options textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

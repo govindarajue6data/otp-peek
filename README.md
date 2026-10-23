@@ -7,8 +7,8 @@ click it — it's on your clipboard. No more switching to Gmail and hunting for
 the code mid-login.
 
 Zero setup: no Google Cloud project, no OAuth, no account connection, no
-Gmail tab needed. It reads Gmail's cookie-authenticated unread-inbox feed,
-which is fresh from the server on every click.
+Gmail tab needed. It reads Gmail's cookie-authenticated unread-mail feeds,
+which are fresh from the server on every click.
 
 ## Requirements
 
@@ -73,6 +73,15 @@ Messages you might see:
   (click the icon again), or you already opened the mail in Gmail — the feed
   lists **unread** mail only.
 
+### Codes filed under a Gmail label
+
+If a Gmail filter puts code emails under a label and **skips the Inbox**,
+open OTP Peek's settings and list that label, one per line, exactly as it
+appears in Gmail. When the popup finds nothing, it links straight to those
+settings. Open them yourself from `about:addons` → OTP Peek → **Options** in
+Firefox, or by right-clicking the toolbar icon → **Options** in Chrome. Mail
+that gets a label but stays in the Inbox needs no setup.
+
 ### Hotkey
 
 **Alt+Shift+C** (Option+Shift+C on Mac) copies the newest OTP without
@@ -91,16 +100,17 @@ fix it if the default ever collides with another extension).
 
 Short version: less than any Gmail tab you already have open.
 
-- It fetches Gmail's unread-inbox feed — **subject, snippet preview, sender,
-  date of unread inbox mail**. It never sees full message bodies, read mail,
-  or other labels.
+- It fetches Gmail's unread-mail feeds (Inbox, all unread where Gmail offers
+  it, and any labels you list) — **subject, snippet preview, sender, date of
+  unread mail**. It never sees full message bodies or read mail.
 - **Read-only.** It cannot send, delete, or mark mail.
-- **Nothing is stored** — no history, no code cache; every popup open reads
-  live and forgets on close.
+- **Nothing it reads is stored** — no history, no code cache; every popup
+  open reads live and forgets on close. The only saved setting is your
+  optional label list.
 - **Nothing leaves your browser.** The only host it may contact is
   `mail.google.com`; there is no analytics, no third-party server.
-- Permissions in `manifest.json`: `clipboardWrite`, host access to
-  `mail.google.com`, and `offscreen` — a Chrome-internal mechanic (the only
+- Permissions in `manifest.json`: `clipboardWrite`, `storage` (the label
+  list), host access to `mail.google.com`, and `offscreen` — a Chrome-internal mechanic (the only
   way a background worker can reach the clipboard for the hotkey; Firefox
   ignores it). That's the whole list.
 - Small enough to audit yourself before installing: `popup.js` (fetch +
@@ -110,7 +120,8 @@ Short version: less than any Gmail tab you already have open.
 
 ## How it works
 
-`popup.js` fetches the atom feed for account slots `u/0..2`. `extractor.js`
+`feed.js` fetches the atom feeds for account slots `u/0..2`: the Inbox, all
+unread mail, and any labels from settings, deduplicated. `extractor.js`
 parses entries and ranks candidate codes by proximity to keywords like
 "code" / "verification", filtering out years, phone-number fragments, and
 currency amounts. Top 3 from the last 20 minutes render in the popup;
@@ -121,7 +132,7 @@ Known tradeoffs:
 - Unread-only: a code you already read in Gmail stops showing. In the normal
   flow you copy it before ever opening the mail, so this rarely bites.
 - More than three Google accounts in one profile: bump `ACCOUNT_SLOTS` in
-  `popup.js`.
+  `feed.js`.
 - The feed is an ancient Google endpoint and Google's to retire; v1.0's
   Gmail-tab DOM scraper (git history) is the fallback design if that day
   comes.

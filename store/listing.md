@@ -39,8 +39,9 @@ copy the newest code directly; the icon flashes ✓ when it's done.
 
 Private by design:
 • Read-only: it cannot send, delete, or mark mail
-• Reads only the unread-inbox feed (subject, snippet, sender), never full messages
-• Nothing is stored and nothing leaves your browser; the only host it contacts is mail.google.com
+• Reads only Gmail's unread-mail feeds (subject, snippet, sender), never full messages
+• Codes filed under a Gmail label? List the label in settings
+• Nothing it reads is stored and nothing leaves your browser; the only host it contacts is mail.google.com
 • No analytics, no ads, no servers
 • Open source, a few hundred lines, no dependencies:
   https://github.com/govindarajug/otp-peek
@@ -69,8 +70,12 @@ copy the chosen code to the clipboard.
   has no clipboard access. An offscreen document with reason CLIPBOARD is the
   Chrome-supported way to write the code to the clipboard from there. It
   renders nothing and makes no network requests.
+- `storage`: Saves the optional list of Gmail label names the user enters on
+  the options page, so the extension also checks those labels' feeds. No
+  mail content or codes are stored.
 - Host permission `https://mail.google.com/*`: Fetches Gmail's
-  unread-inbox Atom feed (`/mail/u/N/feed/atom`) using the user's existing
+  unread-mail Atom feeds (`/mail/u/N/feed/atom`, plus `/unread` and any
+  user-listed labels) using the user's existing
   Gmail session, to find recent one-time codes. No other host is contacted,
   no content scripts are injected, and no page is modified.
 
@@ -91,20 +96,23 @@ Leave everything else unchecked. Certify all three statements:
 
 **Data collection:** the manifest declares
 `data_collection_permissions.required: ["none"]`. Nothing is transmitted off
-the device; mail data is processed in memory only.
+the device; mail data is processed in memory only. The only stored data is
+the user's optional list of label names (`storage.local`).
 
 **Source code:** not required. The package contains the unminified,
 unbundled source exactly as in the repository; there is no build step.
 
 **Notes to reviewer:**
 
-> OTP Peek fetches https://mail.google.com/mail/u/{0,1,2}/feed/atom with the
+> OTP Peek fetches https://mail.google.com/mail/u/{0,1,2}/feed/atom (plus
+> /feed/atom/unread and /feed/atom/<label> for labels the user lists on the
+> options page, kept in storage.local) with the
 > user's existing Gmail cookies (host permission is requested at runtime from
 > the popup with a "Grant Gmail access" button, as MV3 host permissions are
 > opt-in in Firefox). The Atom feed is parsed with regexes in extractor.js;
 > one-time codes are ranked by proximity to keywords like "code" and shown in
 > the popup. Clicking a code, or pressing Alt+Shift+C, writes it to the
-> clipboard. Nothing is stored, and no other host is contacted.
+> clipboard. No mail data or codes are stored, and no other host is contacted.
 >
 > To test: sign into any Gmail account in the browser, send that account an
 > email with subject "Your verification code is 482913", click the toolbar
