@@ -196,3 +196,45 @@ test("rankRows: two null-ts rows keep insertion order", () => {
 function otp_rankRowsCodes(rows) {
   return rankRows(rows, NOW).map((r) => r.code);
 }
+
+const { feedUrls, parseLabels } = require("../extractor.js");
+const FEED_BASE = "https://mail.google.com/mail/u/1/feed/atom";
+
+test("feedUrls: inbox and all-unread feeds by default", () => {
+  assert.deepEqual(feedUrls(1), [FEED_BASE, `${FEED_BASE}/unread`]);
+});
+
+test("feedUrls: one feed per label, names URL-encoded", () => {
+  assert.deepEqual(feedUrls(1, ["OTP", "Bank alerts", "Work/Codes"]), [
+    FEED_BASE,
+    `${FEED_BASE}/unread`,
+    `${FEED_BASE}/OTP`,
+    `${FEED_BASE}/Bank%20alerts`,
+    `${FEED_BASE}/Work%2FCodes`,
+  ]);
+});
+
+test("feedUrls: blank, duplicate and built-in names skipped", () => {
+  assert.deepEqual(feedUrls(1, [" OTP ", "", "OTP", "Inbox", "unread"]), [
+    FEED_BASE,
+    `${FEED_BASE}/unread`,
+    `${FEED_BASE}/OTP`,
+  ]);
+});
+
+test("parseLabels: one per line or comma-separated, trimmed, deduped", () => {
+  assert.deepEqual(parseLabels(" OTP \nBank alerts, Work/Codes\n\notp"), ["OTP", "Bank alerts", "Work/Codes"]);
+});
+
+test("parseLabels: Inbox and unread dropped (always read)", () => {
+  assert.deepEqual(parseLabels("INBOX\nOTP\nUnread"), ["OTP"]);
+});
+
+test("parseLabels: capped at 10 labels", () => {
+  const text = Array.from({ length: 12 }, (_, i) => `L${i}`).join("\n");
+  assert.equal(parseLabels(text).length, 10);
+});
+
+test("parseLabels: empty input gives no labels", () => {
+  assert.deepEqual(parseLabels("  \n , "), []);
+});

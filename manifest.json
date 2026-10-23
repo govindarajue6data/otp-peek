@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "OTP Peek",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Shows your newest Gmail OTP. Click or hotkey to copy. No Gmail tab needed; nothing leaves your browser.",
   "homepage_url": "https://github.com/govindarajug/otp-peek",
   "icons": {
@@ -24,6 +24,9 @@
     "service_worker": "background-chrome.js",
     "scripts": ["extractor.js", "feed.js", "background.js"]
   },
+  "options_ui": {
+    "page": "options.html"
+  },
   "commands": {
     "copy-latest-otp": {
       "suggested_key": {
@@ -32,7 +35,7 @@
       "description": "Copy the latest OTP to the clipboard"
     }
   },
-  "permissions": ["clipboardWrite", "offscreen"],
+  "permissions": ["clipboardWrite", "offscreen", "storage"],
   "host_permissions": ["https://mail.google.com/*"],
   "browser_specific_settings": {
     "gecko": {

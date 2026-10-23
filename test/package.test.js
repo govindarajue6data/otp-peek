@@ -19,6 +19,7 @@ function referencedFiles(built, extraPages) {
     ...Object.values(built.icons ?? {}),
     ...Object.values(built.action?.default_icon ?? {}),
     built.action?.default_popup,
+    built.options_ui?.page,
     built.background.service_worker,
     ...(built.background.scripts ?? []),
     ...extraPages,
@@ -66,6 +67,11 @@ test("gecko minimum versions support data_collection_permissions", () => {
   assert.ok(gecko.data_collection_permissions);
   assert.ok(parseFloat(gecko.strict_min_version) >= 140, "gecko.strict_min_version < 140");
   assert.ok(parseFloat(gecko_android?.strict_min_version) >= 142, "gecko_android.strict_min_version < 142");
+});
+
+test("both zips ship the options page", () => {
+  assert.equal(manifest.options_ui?.page, "options.html");
+  for (const { files } of Object.values(TARGETS)) assert.ok(files.includes("options.html"));
 });
 
 test("transforms do not mutate the source manifest", () => {
